@@ -27,7 +27,9 @@ if __FILE__ == $0
         "//td[contains(text(), 'started')]/../*[@class='streamdata']").text)
       normalized_start = start.strftime("%Y-%m-%d_%H.%M.%S")
 
-      fname = File.join(target_dir, normalized_start)
+      fname = "%s_%s" % [normalized_start, mountpoint.gsub("/", "")]
+      fname = File.join(target_dir, fname)
+
       next if File.exists?(fname)
       puts "Downloading %s to %s" % [stream_url, fname]
       Process.detach(fork {
