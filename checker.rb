@@ -13,21 +13,26 @@ if __FILE__ == $0
 
   base = URI::parse(url + "/")
   status_url = base + "status.xsl"
-  doc = open(status_url) { |f| Nokogiri::XML.parse(f) }
 
-  doc.css(".newscontent").each do |mount|
-    mountpoint = mount.css(".streamheader h3").text.split[-1]
-    stream_url = base + mountpoint[1..-1]
+  loop do
+    doc = open(status_url) { |f| Nokogiri::XML.parse(f) }
 
-    start = DateTime.parse(mount.xpath(
-      "//td[contains(text(), 'started')]/../*[@class='streamdata']").text)
-    normalized_start = start.strftime("%Y-%m-%d_%H.%M.%S")
+    doc.css(".newscontent").each do |mount|
+      mountpoint = mount.css(".streamheader h3").text.split[-1]
+      stream_url = base + mountpoint[1..-1]
 
-    fname = File.join(target_dir, normalized_start)
-    next if File.exists?(fname)
-    puts "Downloading %s to %s" % [stream_url, fname]
-    Process.detach(fork {
-      exec "wget", "--quiet", stream_url.to_s, "-O", fname
-    })
+      start = DateTime.parse(mount.xpath(
+        "//td[contains(text(), 'started')]/../*[@class='streamdata']").text)
+      normalized_start = start.strftime("%Y-%m-%d_%H.%M.%S")
+
+      fname = File.join(target_dir, normalized_start)
+      next if File.exists?(fname)
+      puts "Downloading %s to %s" % [stream_url, fname]
+      Process.detach(fork {
+        exec "wget", "--quiet", stream_url.to_s, "-O", fname
+      })
+    end
+
+    sleep 5
   end
 end
