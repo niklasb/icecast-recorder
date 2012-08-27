@@ -3,7 +3,6 @@
 require 'nokogiri'
 require 'uri'
 require 'open-uri'
-require 'pry'
 
 if __FILE__ == $0
   if ARGV.size != 2
